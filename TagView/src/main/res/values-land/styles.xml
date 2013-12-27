@@ -1,0 +1,20 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <item name="TagStyle">@style/tag_land</item>
+        <item name="HeaderStyle">@style/header</item>
+    </style>
+    
+    <style name="tag_land">
+        <item name="android:background">@color/gatoraid</item>
+        <item name="tag_view_tag_drawable">@drawable/tag</item>
+        <item name="tag_view_tag_margin">3dp</item>
+        <item name="tag_view_tag_padding_horizontal">7dp</item>
+        <item name="tag_view_tag_padding_vertical">1dp</item>
+        <item name="tag_view_text_style">bold</item>
+        <item name="tag_view_text_color">?android:attr/textColorPrimary</item>
+        <item name="tag_view_text_size">24sp</item>
+    </style>
+
+</resources>
