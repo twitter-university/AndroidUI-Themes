@@ -81,7 +81,7 @@ public class TagView extends View {
 
         TypedArray atts = context.getTheme()
             .obtainStyledAttributes(attrs, R.styleable.tag_view, defStyle, 0);
-        try { config = b.build(atts);; }
+        try { config = b.build(atts); }
         finally { atts.recycle(); }
     }
 
