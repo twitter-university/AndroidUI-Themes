@@ -116,8 +116,8 @@ public class TagView extends View {
      */
     @Override
     protected void onMeasure(int wSpec, int hSpec) {
-        int w = getDefaultSize(getSuggestedMinimumWidth(), wSpec);
-        int h = getDefaultSize(getSuggestedMinimumHeight(), hSpec);
+        int w = View.getDefaultSize(getSuggestedMinimumWidth(), wSpec);
+        int h = View.getDefaultSize(getSuggestedMinimumHeight(), hSpec);
 
         computeBounds(w, h, bounds);
 
@@ -128,7 +128,10 @@ public class TagView extends View {
             tw = positionTag(bounds, tagBorderTL, tw, tag);
         }
 
-        h = Math.max(h, Math.round(tagBorderTL.y + config.tagHeight + config.margin));
+        int xTotal = Math.round(tagBorderTL.y + config. tagHeight + config.margin);
+        if ((MeasureSpec.UNSPECIFIED == MeasureSpec.getMode(hSpec)) && (h < xTotal)) {
+            h = xTotal;
+        }
 
         setMeasuredDimension(w, h);
     }
@@ -194,12 +197,12 @@ public class TagView extends View {
     }
 
     private void computeBounds(int w, int h, Rect r) {
-        int padL = getLeftPaddingOffset();
-        int padT = getTopPaddingOffset();
+        int padL = getPaddingLeft();
+        int padT = getPaddingTop();
         r.set(
                 padL,
                 padT,
-                w - (padL + getRightPaddingOffset()),
-                h - (padT + getBottomPaddingOffset()));
+                w - (padL + getPaddingRight()),
+                h - (padT + getPaddingBottom()));
     }
 }
