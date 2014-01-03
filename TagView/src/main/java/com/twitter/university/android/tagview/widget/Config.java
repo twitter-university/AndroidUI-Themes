@@ -177,10 +177,10 @@ class Config {
     public final int margin;
     public final int paddingH;
     public final TextPaint textPaint;
-    public final float textHeight;
     public final float textBaseline;
     public final float tagHeight;
     public final int tagBorderH;
+    public final float tagBorderedV;
 
     public Config(
             LevelListDrawable background,
@@ -195,12 +195,12 @@ class Config {
         this.textPaint = textPaint;
 
         FontMetrics metrics = textPaint.getFontMetrics();
-        float baseline = metrics.leading - metrics.ascent;
+        float baseline = metrics.leading - (metrics.ascent + 1);
+        textBaseline = paddingV + baseline;
 
-        textHeight = metrics.descent + baseline;
-        textBaseline = paddingV + baseline + 1;
-
+        float textHeight = metrics.descent + baseline;
         tagHeight = textHeight + (2 * paddingV);
+        tagBorderedV = tagHeight + (2 * margin);
         tagBorderH = 2 * (paddingH + margin);
     }
 }

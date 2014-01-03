@@ -28,6 +28,7 @@ import android.graphics.RectF;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import com.twitter.university.android.tagview.R;
@@ -44,21 +45,21 @@ public class TagView extends View {
     static final String DEFAULT_FONT = "fonts/DroidSansFallback.ttf";
 
     private static class Tag {
+        final PointF tl = new PointF();
         final int level;
-        final String tag;
+        final String text;
         String shortTag;
+        float w;
         public Tag(String tag, int level) {
             this.level = level;
-            this.tag = tag;
+            this.text = tag;
             this.shortTag = tag;
         }
     }
 
     private final Config config;
-    private final Rect bounds = new Rect();
     private final Rect tagRect = new Rect();
     private final RectF tagRectF = new RectF();
-    private final PointF tagBorderTL = new PointF();
     private final PointF tagTL = new PointF();
     private final List<Tag> tags = new ArrayList<Tag>();
 
@@ -119,21 +120,50 @@ public class TagView extends View {
         int w = View.getDefaultSize(getSuggestedMinimumWidth(), wSpec);
         int h = View.getDefaultSize(getSuggestedMinimumHeight(), hSpec);
 
-        computeBounds(w, h, bounds);
+        if (MeasureSpec.EXACTLY != MeasureSpec.getMode(hSpec)) {
+            Log.d("TAG", "w: " + w);
+            int maxW = w - (getPaddingLeft() + getPaddingRight());
 
-        float tw = 0;
-        tagBorderTL.set(bounds.left, bounds.top);
-        for (Tag tag: tags) {
-            tag.shortTag = tag.tag;
-            tw = positionTag(bounds, tagBorderTL, tw, tag);
-        }
+            float x = 0;
+            int lines = 1;
+            for (Tag tag : tags) {
+                float tw = config.textPaint.measureText(tag.text) + config.tagBorderH;
 
-        int xTotal = Math.round(tagBorderTL.y + config. tagHeight + config.margin);
-        if ((MeasureSpec.UNSPECIFIED == MeasureSpec.getMode(hSpec)) && (h < xTotal)) {
-            h = xTotal;
+                if (x + tw > maxW) {
+                    lines++;
+                    x = 0;
+                }
+
+                x += tw;
+            }
+
+            h = Math.round(lines * config.tagBorderedV);
         }
 
         setMeasuredDimension(w, h);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        if (!changed) { return; }
+
+        int padL = getPaddingLeft();
+        int padT = getPaddingTop();
+        int maxW = right - (left + padL + getPaddingRight());
+        PointF tagBorderTL = new PointF(padL, padT);
+        for (Tag tag : tags) {
+            tag.shortTag = TextUtils
+                .ellipsize(tag.text, config.textPaint, maxW - config.tagBorderH, TruncateAt.END)
+                .toString();
+
+            tag.w = config.textPaint.measureText(tag.shortTag);
+            if (tagBorderTL.x + tag.w + config.tagBorderH > maxW) {
+                tagBorderTL.set(padL, tagBorderTL.y + config.tagBorderedV);
+            }
+            tag.tl.set(tagBorderTL);
+
+            tagBorderTL.x += tag.w + config.tagBorderH;
+        }
     }
 
     /**
@@ -143,20 +173,14 @@ public class TagView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        computeBounds(getWidth(), getHeight(), bounds);
-
-        float tw = 0;
-        tagBorderTL.set(bounds.left, bounds.top);
         for (Tag tag: tags) {
-            tw = positionTag(bounds, tagBorderTL, tw, tag);
-
-            tagTL.set(tagBorderTL);
+            tagTL.set(tag.tl);
             tagTL.offset(config.margin, config.margin);
 
             tagRectF.set(
                     tagTL.x,
                     tagTL.y,
-                    tagTL.x + tw - (2 * config.margin) + 1,
+                    tagTL.x + tag.w + (2 * config.paddingH) + 1,
                     tagTL.y + config.tagHeight);
 
             tagRectF.round(tagRect);
@@ -167,42 +191,8 @@ public class TagView extends View {
             canvas.drawText(
                     tag.shortTag,
                     tagTL.x + config.paddingH,
-                    tagTL.y + config.textBaseline - 2,
+                    tagTL.y + config.textBaseline,
                     config.textPaint);
         }
-    }
-
-    private float positionTag(Rect viewBounds, PointF tagLoc, float tw, Tag tag) {
-        int maxW = (viewBounds.right - viewBounds.left);
-        tagLoc.x += tw;
-
-        while (true) {
-            tw = config.textPaint.measureText(tag.shortTag) + config.tagBorderH;
-
-            if (tw <= maxW) { break; }
-
-            tag.shortTag = TextUtils.ellipsize(
-                    tag.shortTag,
-                    config.textPaint,
-                    maxW - config.tagBorderH,
-                    TruncateAt.END)
-                .toString();
-        }
-
-        if (tagLoc.x + tw > maxW) {
-            tagLoc.set(viewBounds.left, tagLoc.y + config.tagHeight + (2 * config.margin));
-        }
-
-        return tw;
-    }
-
-    private void computeBounds(int w, int h, Rect r) {
-        int padL = getPaddingLeft();
-        int padT = getPaddingTop();
-        r.set(
-                padL,
-                padT,
-                w - (padL + getPaddingRight()),
-                h - (padT + getPaddingBottom()));
     }
 }
