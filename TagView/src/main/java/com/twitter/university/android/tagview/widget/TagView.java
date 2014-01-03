@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -44,13 +46,6 @@ import com.twitter.university.android.tagview.R;
 public class TagView extends View {
     private static final String TAG = "TAGVIEW";
 
-    private static final int MARGIN = 7;
-    private static final int PAD_H = 7;
-    private static final int PAD_V = 1;
-    private static final int TEXT_SIZE = 64;
-    private static final int TEXT_COLOR = Color.BLUE;
-    private static final int TAG_BG = R.drawable.tag;
-
     private static class Tag {
         final PointF tl = new PointF();
         final int level;
@@ -67,7 +62,6 @@ public class TagView extends View {
     private final float tagHeight;
     private final float tagBorderedV;
     private final float tagBorderH;
-    private final LevelListDrawable background;
     private final TextPaint textPaint = new TextPaint();
 
     private final Rect tagRect = new Rect();
@@ -75,6 +69,12 @@ public class TagView extends View {
     private final PointF tagTL = new PointF();
     private final List<Tag> tags = new ArrayList<Tag>();
 
+    private int margin = 7;
+    private int paddingV = 7;
+    private int paddingH = 1;
+    private int textSize = 64;
+    private int textColor = Color.BLUE;
+    private LevelListDrawable background;
 
     /**
      * @param context
@@ -84,19 +84,22 @@ public class TagView extends View {
     public TagView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
-        background = (LevelListDrawable) getResources().getDrawable(TAG_BG);
+        TypedArray atts
+            = context.getTheme().obtainStyledAttributes(attrs, R.styleable.tag_view, defStyle, 0);
+        try { parseAttrs(atts); }
+        finally { atts.recycle(); }
 
         textPaint.setAntiAlias(true);
-        textPaint.setTextSize(TEXT_SIZE);
+        textPaint.setTextSize(textSize);
         textPaint.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-        textPaint.setColor(TEXT_COLOR);
+        textPaint.setColor(textColor);
 
         Paint.FontMetrics metrics = textPaint.getFontMetrics();
         textBaseline = metrics.leading - metrics.ascent;
         float textHeight = metrics.descent + textBaseline;
-        tagHeight = textHeight + (2 * PAD_V);
-        tagBorderedV = tagHeight + (2 * MARGIN);
-        tagBorderH = 2 * (PAD_H + MARGIN);
+        tagHeight = textHeight + (2 * paddingV);
+        tagBorderedV = tagHeight + (2 * margin);
+        tagBorderH = 2 * (paddingH + margin);
 
     }
 
@@ -188,12 +191,12 @@ public class TagView extends View {
 
         for (Tag tag: tags) {
             tagTL.set(tag.tl);
-            tagTL.offset(MARGIN, MARGIN);
+            tagTL.offset(margin, margin);
 
             tagRectF.set(
                     tagTL.x,
                     tagTL.y,
-                    tagTL.x + tag.w + (2 * PAD_H) + 1,
+                    tagTL.x + tag.w + (2 * paddingH) + 1,
                     tagTL.y + tagHeight);
 
             tagRectF.round(tagRect);
@@ -203,9 +206,50 @@ public class TagView extends View {
 
             canvas.drawText(
                     tag.shortTag,
-                    tagTL.x + PAD_H,
+                    tagTL.x + paddingH,
                     tagTL.y + textBaseline,
                     textPaint);
         }
     }
+
+    private void parseAttrs(TypedArray atts) {
+        final int n = atts.getIndexCount();
+        for (int i = 0; i < n; i++) {
+            try {
+                int attr = atts.getIndex(i);
+                switch (attr) {
+                    case R.styleable.tag_view_tag_view_tag_drawable:
+                        background = (LevelListDrawable) atts.getDrawable(attr);
+                        break;
+
+                    case R.styleable.tag_view_tag_view_tag_margin:
+                        margin = atts.getDimensionPixelSize(attr, margin);
+                        break;
+
+                    case R.styleable.tag_view_tag_view_tag_padding_horizontal:
+                        paddingH = atts.getDimensionPixelSize(attr, paddingH);
+                        break;
+
+                    case R.styleable.tag_view_tag_view_tag_padding_vertical:
+                        paddingV = atts.getDimensionPixelSize(attr, paddingV);
+                        break;
+
+                    case R.styleable.tag_view_tag_view_text_color:
+                        textColor = atts.getColor(attr, textColor);
+                        break;
+
+                    case R.styleable.tag_view_tag_view_text_size:
+                        textSize = atts.getDimensionPixelSize(attr, textSize);
+                        break;
+                }
+            }
+            catch (UnsupportedOperationException e) {
+                Log.w(TagView.TAG, "Failed parsing attribute: " + atts.getString(i), e);
+            }
+            catch (Resources.NotFoundException e) {
+                Log.w(TagView.TAG, "Failed parsing attribute: " + atts.getString(i), e);
+            }
+        }
+    }
 }
+

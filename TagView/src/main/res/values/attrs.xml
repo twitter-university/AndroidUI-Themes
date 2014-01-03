@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="tag_view">
+        <attr name="tag_view_tag_drawable" format="reference" />
+        <attr name="tag_view_tag_margin" format="dimension" />
+        <attr name="tag_view_tag_padding_horizontal" format="dimension" />
+        <attr name="tag_view_tag_padding_vertical" format="dimension" />
+        <attr name="tag_view_text_size" format="dimension" />
+        <attr name="tag_view_text_color" format="color" />
+    </declare-styleable>
+
+</resources>
