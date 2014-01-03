@@ -36,40 +36,5 @@ public class TagViewActivity extends Activity {
         tags.addTag("Fourteen", 0);
         tags.addTag("Fifteen", 0);
         tags.addTag("Sixteen", 0);
-
-        parseResource(R.layout.activity_tag_view);
-    }
-
-    private void parseResource(int resId) {
-        Resources rez = getResources();
-
-        XmlResourceParser xml = rez.getXml(resId);
-        while (true) {
-            try {
-                xml.next();
-                switch (xml.getEventType()) {
-                    case XmlPullParser.END_DOCUMENT:
-                        return;
-
-                    case XmlPullParser.START_DOCUMENT:
-                        Log.d("XML", "doc: " + xml.getName());
-                        break;
-
-                    case XmlPullParser.START_TAG:
-                        Log.d("XML", "tag: " + xml.getName());
-                        for (int i = 0; i < xml.getAttributeCount(); i++) {
-                            Log.d("XML", "attr @" + i + ": " + xml.getAttributeName(i) + "=" + xml.getAttributeValue(i));
-                        }
-                        break;
-
-                    case XmlPullParser.END_TAG:
-                        break;
-
-                    case XmlPullParser.TEXT:
-                        Log.d("XML", "text: " + xml.getText());
-                }
-            }
-            catch (Exception e) { return; }
-        }
     }
 }

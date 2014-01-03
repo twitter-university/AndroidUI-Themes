@@ -5,8 +5,6 @@
     <string name="app_name">TagView</string>
 
     <!-- Menu -->
-    <string name="menu_one">One</string>
-    <string name="menu_two">Two</string>
     <string name="menu_tags">Tags</string>
     <string name="menu_notify">Notify</string>
 
