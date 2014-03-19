@@ -207,7 +207,7 @@ public class TagView extends View {
             canvas.drawText(
                     tag.shortTag,
                     tagTL.x + paddingH,
-                    tagTL.y + textBaseline,
+                    tagTL.y + paddingV + textBaseline,
                     textPaint);
         }
     }
